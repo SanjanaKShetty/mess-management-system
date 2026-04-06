@@ -63,20 +63,23 @@
 
     </div>
 
-    <!-- Chart Script -->
-    <script>
-        const ctx = document.getElementById('mealChart');
+   <script>
+    const ctx = document.getElementById('mealChart');
 
-        new Chart(ctx, {
-            type: 'pie',
-            data: {
-                labels: ['Eating', 'Not Eating'],
-                datasets: [{
-                    data: [{{ eating }}, {{ not_eating }}]
-                }]
-            }
-        });
-    </script>
+    const eating = JSON.parse('{{ eating | tojson }}');
+    const notEating = JSON.parse('{{ not_eating | tojson }}');
+
+    new Chart(ctx, {
+        type: 'pie',
+        data: {
+            labels: ['Eating', 'Not Eating'],
+            datasets: [{
+                data: [eating, notEating]
+            }]
+        }
+    });
+</script>
+    
 
 </body>
 </html>

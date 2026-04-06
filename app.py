@@ -1,5 +1,9 @@
 import sqlite3
 from flask import Flask, render_template, request, redirect
+import os
+
+if not os.path.exists('database.db'):
+    import database
 
 app = Flask(__name__)
 
