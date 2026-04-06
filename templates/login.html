@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Mess Manager</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 flex justify-center items-center h-screen">
+
+    <div class="bg-white p-8 rounded-2xl shadow-lg w-80">
+        <h2 class="text-2xl font-bold mb-4 text-center">Mess Login</h2>
+
+        <form action="/dashboard" method="POST">
+            <input type="text" name="name" placeholder="Enter your name"
+                   class="w-full p-2 border rounded mb-4" required>
+
+            <button class="w-full bg-blue-500 text-white p-2 rounded hover:bg-blue-600">
+                Login
+            </button>
+        </form>
+    </div>
+
+</body>
+</html>
