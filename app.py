@@ -1,32 +1,35 @@
-import sqlite3
 from flask import Flask, render_template, request, redirect
+import sqlite3
 import os
-
-if not os.path.exists('database.db'):
-    import database
 
 app = Flask(__name__)
 
-students = []
-import sqlite3
+# -----------------------------
+# DATABASE SETUP
+# -----------------------------
+def get_db():
+    db_path = os.path.join(os.getcwd(), 'database.db')
+    return sqlite3.connect(db_path)
 
 def init_db():
-    conn = sqlite3.connect('database.db')
+    conn = get_db()
     c = conn.cursor()
 
+    # responses table
     c.execute('''
-    CREATE TABLE IF NOT EXISTS responses (
-        name TEXT,
-        status TEXT
-    )
+        CREATE TABLE IF NOT EXISTS responses (
+            name TEXT,
+            status TEXT
+        )
     ''')
 
+    # feedback table
     c.execute('''
-    CREATE TABLE IF NOT EXISTS feedback (
-        name TEXT,
-        rating INTEGER,
-        comment TEXT
-    )
+        CREATE TABLE IF NOT EXISTS feedback (
+            name TEXT,
+            rating INTEGER,
+            comment TEXT
+        )
     ''')
 
     conn.commit()
@@ -34,88 +37,94 @@ def init_db():
 
 init_db()
 
+# -----------------------------
+# HOME PAGE
+# -----------------------------
 @app.route('/')
-def login():
-    return render_template('login.html')
+def home():
+    return render_template('dashboard.html')
 
-@app.route('/dashboard', methods=['POST'])
-def dashboard():
-    name = request.form['name']
-
-    conn = sqlite3.connect('database.db')
-    cursor = conn.cursor()
-
-    cursor.execute("SELECT COUNT(*) FROM meals WHERE status='yes'")
-    count = cursor.fetchone()[0]
-
-    conn.close()
-
-    return render_template('dashboard.html', name=name, count=count)
-
+# -----------------------------
+# SUBMIT RESPONSE
+# -----------------------------
 @app.route('/submit', methods=['POST'])
 def submit():
-    status = request.form['status']
-    name = request.form.get('name', 'Anonymous')
+    name = request.form.get('name')
+    status = request.form.get('status')
 
-    conn = sqlite3.connect('database.db')
-    cursor = conn.cursor()
-
-    cursor.execute("INSERT INTO meals (name, status) VALUES (?, ?)", (name, status))
-
+    conn = get_db()
+    c = conn.cursor()
+    c.execute("INSERT INTO responses VALUES (?, ?)", (name, status))
     conn.commit()
     conn.close()
 
     return "Response Saved in Database!"
-@app.route('/feedback_page/<name>')
-def feedback_page(name):
-    return render_template('feedback.html', name=name)
 
+# -----------------------------
+# FEEDBACK PAGE
+# -----------------------------
+@app.route('/feedback')
+def feedback_page():
+    return render_template('feedback.html')
 
-@app.route('/feedback', methods=['POST'])
-def feedback():
-    name = request.form['name']
-    rating = request.form['rating']
-    comment = request.form['comment']
+# -----------------------------
+# SUBMIT FEEDBACK
+# -----------------------------
+@app.route('/submit_feedback', methods=['POST'])
+def submit_feedback():
+    name = request.form.get('name')
+    rating = request.form.get('rating')
+    comment = request.form.get('comment')
 
-    conn = sqlite3.connect('database.db')
-    cursor = conn.cursor()
-
-    cursor.execute("INSERT INTO feedback (name, rating, comment) VALUES (?, ?, ?)",
-                   (name, rating, comment))
-
+    conn = get_db()
+    c = conn.cursor()
+    c.execute("INSERT INTO feedback VALUES (?, ?, ?)", (name, rating, comment))
     conn.commit()
     conn.close()
 
-    return "Feedback Submitted!"
+    return redirect('/admin')
+
+# -----------------------------
+# ADMIN DASHBOARD
+# -----------------------------
 @app.route('/admin')
 def admin():
 
-    conn = sqlite3.connect('database.db')
-    cursor = conn.cursor()
+    try:
+        conn = get_db()
+        c = conn.cursor()
 
-    # Total eating
-    cursor.execute("SELECT COUNT(*) FROM meals WHERE status='yes'")
-    eating = cursor.fetchone()[0]
+        # count eating
+        c.execute("SELECT COUNT(*) FROM responses WHERE status='yes'")
+        eating = c.fetchone()[0]
 
-    # Total not eating
-    cursor.execute("SELECT COUNT(*) FROM meals WHERE status='no'")
-    not_eating = cursor.fetchone()[0]
+        # count not eating
+        c.execute("SELECT COUNT(*) FROM responses WHERE status='no'")
+        not_eating = c.fetchone()[0]
 
-    # Average rating
-    cursor.execute("SELECT AVG(rating) FROM feedback")
-    avg_rating = cursor.fetchone()[0]
+        # avg rating
+        c.execute("SELECT AVG(rating) FROM feedback")
+        avg_rating = c.fetchone()[0]
 
-    # All feedback
-    cursor.execute("SELECT name, rating, comment FROM feedback")
-    feedbacks = cursor.fetchall()
+        # feedback list
+        c.execute("SELECT * FROM feedback")
+        feedbacks = c.fetchall()
 
-    conn.close()
+        conn.close()
 
-    return render_template('admin.html',
-                           eating=eating,
-                           not_eating=not_eating,
-                           avg_rating=avg_rating,
-                           feedbacks=feedbacks)
+        return render_template(
+            'admin.html',
+            eating=eating,
+            not_eating=not_eating,
+            avg_rating=avg_rating if avg_rating else 0,
+            feedbacks=feedbacks
+        )
 
-if __name__ == "__main__":
-    app.run()
+    except Exception as e:
+        return f"Error: {e}"
+
+# -----------------------------
+# RUN APP
+# -----------------------------
+if __name__ == '__main__':
+    app.run(debug=True)
