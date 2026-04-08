@@ -1,14 +1,15 @@
 from flask import Flask, render_template, request, redirect
 import sqlite3
-import os
 
 app = Flask(__name__)
 
 # -----------------------------
-# DATABASE
+# DATABASE FUNCTIONS
 # -----------------------------
 def get_db():
-    return sqlite3.connect("database.db")
+    conn = sqlite3.connect("database.db")
+    conn.row_factory = sqlite3.Row
+    return conn
 
 def init_db():
     conn = get_db()
@@ -46,16 +47,20 @@ def home():
 # -----------------------------
 @app.route('/submit', methods=['POST'])
 def submit():
-    name = request.form.get('name')
-    status = request.form.get('status')
+    try:
+        name = request.form.get('name')
+        status = request.form.get('status')
 
-    conn = get_db()
-    c = conn.cursor()
-    c.execute("INSERT INTO responses VALUES (?, ?)", (name, status))
-    conn.commit()
-    conn.close()
+        conn = get_db()
+        c = conn.cursor()
+        c.execute("INSERT INTO responses VALUES (?, ?)", (name, status))
+        conn.commit()
+        conn.close()
 
-    return redirect('/admin')   # ✅ redirect to admin
+        return redirect('/admin')
+
+    except Exception as e:
+        return f"Submit Error: {e}"
 
 # -----------------------------
 # FEEDBACK PAGE
@@ -69,35 +74,40 @@ def feedback_page():
 # -----------------------------
 @app.route('/submit_feedback', methods=['POST'])
 def submit_feedback():
-    name = request.form.get('name')
-    rating = request.form.get('rating')
-    comment = request.form.get('comment')
+    try:
+        name = request.form.get('name')
+        rating = request.form.get('rating')
+        comment = request.form.get('comment')
 
-    conn = get_db()
-    c = conn.cursor()
-    c.execute("INSERT INTO feedback VALUES (?, ?, ?)", (name, rating, comment))
-    conn.commit()
-    conn.close()
+        conn = get_db()
+        c = conn.cursor()
+        c.execute("INSERT INTO feedback VALUES (?, ?, ?)", (name, rating, comment))
+        conn.commit()
+        conn.close()
 
-    return redirect('/admin')
+        return redirect('/admin')
+
+    except Exception as e:
+        return f"Feedback Error: {e}"
 
 # -----------------------------
-# ADMIN DASHBOARD (IMPORTANT)
+# ADMIN DASHBOARD
 # -----------------------------
-@app.route('/admin', methods=['GET'])   # ✅ ONLY GET
+@app.route('/admin')
 def admin():
     try:
         conn = get_db()
         c = conn.cursor()
 
+        # SAFE queries
         c.execute("SELECT COUNT(*) FROM responses WHERE status='yes'")
-        eating = c.fetchone()[0]
+        eating = c.fetchone()[0] or 0
 
         c.execute("SELECT COUNT(*) FROM responses WHERE status='no'")
-        not_eating = c.fetchone()[0]
+        not_eating = c.fetchone()[0] or 0
 
         c.execute("SELECT AVG(rating) FROM feedback")
-        avg_rating = c.fetchone()[0]
+        avg_rating = c.fetchone()[0] or 0
 
         c.execute("SELECT * FROM feedback")
         feedbacks = c.fetchall()
@@ -108,12 +118,12 @@ def admin():
             'admin.html',
             eating=eating,
             not_eating=not_eating,
-            avg_rating=avg_rating if avg_rating else 0,
+            avg_rating=round(avg_rating, 1) if avg_rating else 0,
             feedbacks=feedbacks
         )
 
     except Exception as e:
-        return f"Error: {e}"
+        return f"ADMIN ERROR: {e}"
 
 # -----------------------------
 # RUN
