@@ -95,19 +95,19 @@ def submit_feedback():
 # -----------------------------
 @app.route('/admin')
 def admin():
+    import traceback
     try:
-        conn = get_db()
+        conn = sqlite3.connect("database.db")
         c = conn.cursor()
 
-        # SAFE queries
-        c.execute("SELECT COUNT(*) FROM responses WHERE status='yes'")
-        eating = c.fetchone()[0] or 0
+        c.execute("SELECT COUNT(*) FROM responses")
+        eating = c.fetchone()[0]
 
-        c.execute("SELECT COUNT(*) FROM responses WHERE status='no'")
-        not_eating = c.fetchone()[0] or 0
+        c.execute("SELECT COUNT(*) FROM responses")
+        not_eating = c.fetchone()[0]
 
         c.execute("SELECT AVG(rating) FROM feedback")
-        avg_rating = c.fetchone()[0] or 0
+        avg_rating = c.fetchone()[0]
 
         c.execute("SELECT * FROM feedback")
         feedbacks = c.fetchall()
@@ -118,13 +118,12 @@ def admin():
             'admin.html',
             eating=eating,
             not_eating=not_eating,
-            avg_rating=round(avg_rating, 1) if avg_rating else 0,
+            avg_rating=avg_rating or 0,
             feedbacks=feedbacks
         )
 
     except Exception as e:
-        return f"ADMIN ERROR: {e}"
-
+        return f"<h1>ERROR:</h1><pre>{traceback.format_exc()}</pre>"
 # -----------------------------
 # RUN
 # -----------------------------
