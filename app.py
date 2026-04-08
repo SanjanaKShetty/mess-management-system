@@ -5,17 +5,15 @@ import os
 app = Flask(__name__)
 
 # -----------------------------
-# DATABASE SETUP
+# DATABASE
 # -----------------------------
 def get_db():
-    db_path = os.path.join(os.getcwd(), 'database.db')
-    return sqlite3.connect(db_path)
+    return sqlite3.connect("database.db")
 
 def init_db():
     conn = get_db()
     c = conn.cursor()
 
-    # responses table
     c.execute('''
         CREATE TABLE IF NOT EXISTS responses (
             name TEXT,
@@ -23,7 +21,6 @@ def init_db():
         )
     ''')
 
-    # feedback table
     c.execute('''
         CREATE TABLE IF NOT EXISTS feedback (
             name TEXT,
@@ -58,7 +55,7 @@ def submit():
     conn.commit()
     conn.close()
 
-    return "Response Saved in Database!"
+    return redirect('/admin')   # ✅ redirect to admin
 
 # -----------------------------
 # FEEDBACK PAGE
@@ -85,28 +82,23 @@ def submit_feedback():
     return redirect('/admin')
 
 # -----------------------------
-# ADMIN DASHBOARD
+# ADMIN DASHBOARD (IMPORTANT)
 # -----------------------------
-@app.route('/admin')
+@app.route('/admin', methods=['GET'])   # ✅ ONLY GET
 def admin():
-
     try:
         conn = get_db()
         c = conn.cursor()
 
-        # count eating
         c.execute("SELECT COUNT(*) FROM responses WHERE status='yes'")
         eating = c.fetchone()[0]
 
-        # count not eating
         c.execute("SELECT COUNT(*) FROM responses WHERE status='no'")
         not_eating = c.fetchone()[0]
 
-        # avg rating
         c.execute("SELECT AVG(rating) FROM feedback")
         avg_rating = c.fetchone()[0]
 
-        # feedback list
         c.execute("SELECT * FROM feedback")
         feedbacks = c.fetchall()
 
@@ -124,7 +116,7 @@ def admin():
         return f"Error: {e}"
 
 # -----------------------------
-# RUN APP
+# RUN
 # -----------------------------
-if __name__ == '__main__':
+if __name__ == "__main__":
     app.run(debug=True)
