@@ -8,6 +8,31 @@ if not os.path.exists('database.db'):
 app = Flask(__name__)
 
 students = []
+import sqlite3
+
+def init_db():
+    conn = sqlite3.connect('database.db')
+    c = conn.cursor()
+
+    c.execute('''
+    CREATE TABLE IF NOT EXISTS responses (
+        name TEXT,
+        status TEXT
+    )
+    ''')
+
+    c.execute('''
+    CREATE TABLE IF NOT EXISTS feedback (
+        name TEXT,
+        rating INTEGER,
+        comment TEXT
+    )
+    ''')
+
+    conn.commit()
+    conn.close()
+
+init_db()
 
 @app.route('/')
 def login():
