@@ -3,33 +3,31 @@ import sqlite3
 
 app = Flask(__name__)
 
-# 🔹 DB CONNECTION FUNCTION
+# DB
 def get_db():
     conn = sqlite3.connect("database.db")
-    conn.row_factory = sqlite3.Row
     return conn
 
-
-# 🔹 CREATE TABLES (RUN ON START)
+# INIT DB
 def init_db():
     conn = get_db()
     cursor = conn.cursor()
 
     cursor.execute("""
-        CREATE TABLE IF NOT EXISTS responses (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            name TEXT,
-            status TEXT
-        )
+    CREATE TABLE IF NOT EXISTS responses (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        name TEXT,
+        status TEXT
+    )
     """)
 
     cursor.execute("""
-        CREATE TABLE IF NOT EXISTS feedback (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            name TEXT,
-            rating INTEGER,
-            comment TEXT
-        )
+    CREATE TABLE IF NOT EXISTS feedback (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        name TEXT,
+        rating INTEGER,
+        comment TEXT
+    )
     """)
 
     conn.commit()
@@ -37,79 +35,62 @@ def init_db():
 
 init_db()
 
-
-# 🔹 HOME PAGE
+# HOME
 @app.route("/")
 def home():
     return render_template("dashboard.html")
 
-
-# 🔹 SUBMIT MEAL
+# SUBMIT MEAL
 @app.route("/submit", methods=["POST"])
 def submit():
     name = request.form.get("name")
     status = request.form.get("status")
 
     conn = get_db()
-    conn.execute(
-        "INSERT INTO responses (name, status) VALUES (?, ?)",
-        (name, status)
-    )
+    conn.execute("INSERT INTO responses (name, status) VALUES (?, ?)", (name, status))
     conn.commit()
     conn.close()
 
     return redirect("/")
 
-
-# 🔹 FEEDBACK PAGE
+# FEEDBACK PAGE
 @app.route("/feedback")
 def feedback():
     return render_template("feedback.html")
 
-
-# 🔹 SUBMIT FEEDBACK
+# SUBMIT FEEDBACK
 @app.route("/submit_feedback", methods=["POST"])
 def submit_feedback():
     name = request.form.get("name")
     rating = request.form.get("rating")
     comment = request.form.get("comment")
 
-    # 🚨 IMPORTANT FIX
-    if not rating:
-        return "Please select rating!"
+    print("DEBUG:", name, rating, comment)  # 🔥 IMPORTANT
+
+    if rating is None or rating == "":
+        return "ERROR: Rating not selected"
 
     conn = get_db()
     conn.execute(
         "INSERT INTO feedback (name, rating, comment) VALUES (?, ?, ?)",
-        (name, rating, comment)
+        (name, int(rating), comment)
     )
     conn.commit()
     conn.close()
 
     return redirect("/admin")
 
-
-# 🔹 ADMIN PAGE
+# ADMIN
 @app.route("/admin")
 def admin():
     conn = get_db()
 
-    eating = conn.execute(
-        "SELECT COUNT(*) FROM responses WHERE status='yes'"
-    ).fetchone()[0]
+    eating = conn.execute("SELECT COUNT(*) FROM responses WHERE status='yes'").fetchone()[0]
+    not_eating = conn.execute("SELECT COUNT(*) FROM responses WHERE status='no'").fetchone()[0]
 
-    not_eating = conn.execute(
-        "SELECT COUNT(*) FROM responses WHERE status='no'"
-    ).fetchone()[0]
+    feedbacks = conn.execute("SELECT name, rating, comment FROM feedback").fetchall()
 
-    feedbacks = conn.execute(
-        "SELECT name, rating, comment FROM feedback"
-    ).fetchall()
-
-    avg = conn.execute(
-        "SELECT AVG(rating) FROM feedback"
-    ).fetchone()[0]
-
+    avg = conn.execute("SELECT AVG(rating) FROM feedback").fetchone()[0]
     avg_rating = round(avg, 1) if avg else 0
 
     conn.close()
@@ -122,7 +103,5 @@ def admin():
         avg_rating=avg_rating
     )
 
-
-# 🔹 RUN
 if __name__ == "__main__":
     app.run(debug=True)

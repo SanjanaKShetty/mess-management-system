@@ -6,11 +6,11 @@
 
     <style>
         .star {
-            cursor: pointer;
             font-size: 30px;
+            cursor: pointer;
             color: gray;
         }
-        .star.selected {
+        .active {
             color: gold;
         }
     </style>
@@ -18,39 +18,32 @@
 
 <body class="bg-gray-100 flex justify-center items-center h-screen">
 
-<div class="bg-white p-8 rounded-2xl shadow-lg w-96">
+<div class="bg-white p-8 rounded-xl shadow w-96">
 
-    <h2 class="text-2xl font-bold text-center mb-6">
-        ⭐ Give Feedback
-    </h2>
+    <h2 class="text-2xl font-bold text-center mb-6">⭐ Feedback</h2>
 
     <form action="/submit_feedback" method="POST">
 
-        <!-- Name -->
         <input type="text" name="name" placeholder="Your name"
-            class="w-full p-3 border rounded mb-4" required>
+            class="w-full p-2 border rounded mb-4" required>
 
-        <!-- Stars -->
-        <div class="text-center mb-4">
-            <p class="mb-2 font-medium">Rate your experience:</p>
+        <p class="text-center mb-2">Rate:</p>
 
-            <div id="stars" class="flex justify-center gap-2">
-                <span class="star" data-value="1">★</span>
-                <span class="star" data-value="2">★</span>
-                <span class="star" data-value="3">★</span>
-                <span class="star" data-value="4">★</span>
-                <span class="star" data-value="5">★</span>
-            </div>
-
-            <input type="hidden" name="rating" id="rating" required>
+        <div class="flex justify-center gap-2 mb-4">
+            <span class="star" onclick="setRating(1)">★</span>
+            <span class="star" onclick="setRating(2)">★</span>
+            <span class="star" onclick="setRating(3)">★</span>
+            <span class="star" onclick="setRating(4)">★</span>
+            <span class="star" onclick="setRating(5)">★</span>
         </div>
 
-        <!-- Comment -->
-        <textarea name="comment" placeholder="Write feedback..."
-            class="w-full p-3 border rounded mb-4"></textarea>
+        <input type="hidden" name="rating" id="rating">
 
-        <button class="w-full bg-purple-500 text-white py-2 rounded-lg hover:bg-purple-600">
-            Submit Feedback
+        <textarea name="comment" placeholder="Comment"
+            class="w-full p-2 border rounded mb-4"></textarea>
+
+        <button class="w-full bg-purple-500 text-white p-2 rounded">
+            Submit
         </button>
 
     </form>
@@ -58,21 +51,15 @@
 </div>
 
 <script>
-const stars = document.querySelectorAll('.star');
-const ratingInput = document.getElementById('rating');
+function setRating(value) {
+    document.getElementById("rating").value = value;
 
-stars.forEach(star => {
-    star.addEventListener('click', () => {
-        const value = star.getAttribute('data-value');
-        ratingInput.value = value;
-
-        stars.forEach(s => s.classList.remove('selected'));
-
-        for (let i = 0; i < value; i++) {
-            stars[i].classList.add('selected');
-        }
+    let stars = document.querySelectorAll(".star");
+    stars.forEach((s, i) => {
+        if (i < value) s.classList.add("active");
+        else s.classList.remove("active");
     });
-});
+}
 </script>
 
 </body>
