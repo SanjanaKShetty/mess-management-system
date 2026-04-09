@@ -1,13 +1,17 @@
 from flask import Flask, render_template, request, redirect
 import sqlite3
+import os
 
 app = Flask(__name__)
 
-# ---------- DB ----------
+DB_PATH = "database.db"
+
+# ---------- SAFE DB ----------
 def get_db():
-    conn = sqlite3.connect("database.db")
+    conn = sqlite3.connect(DB_PATH, check_same_thread=False)
     return conn
 
+# ---------- INIT DB ----------
 def init_db():
     conn = get_db()
     cur = conn.cursor()
@@ -42,15 +46,18 @@ def home():
 # ---------- SUBMIT ----------
 @app.route("/submit", methods=["POST"])
 def submit():
-    name = request.form.get("name")
-    status = request.form.get("status")
+    try:
+        name = request.form.get("name")
+        status = request.form.get("status")
 
-    conn = get_db()
-    conn.execute("INSERT INTO responses (name, status) VALUES (?, ?)", (name, status))
-    conn.commit()
-    conn.close()
+        conn = get_db()
+        conn.execute("INSERT INTO responses (name, status) VALUES (?, ?)", (name, status))
+        conn.commit()
+        conn.close()
 
-    return redirect("/")
+        return redirect("/")
+    except Exception as e:
+        return str(e)
 
 # ---------- FEEDBACK PAGE ----------
 @app.route("/feedback")
@@ -66,7 +73,7 @@ def submit_feedback():
         comment = request.form.get("comment")
 
         if not rating:
-            return "Please select rating ⭐"
+            return "❌ Click stars before submitting"
 
         conn = get_db()
         conn.execute(
@@ -79,7 +86,7 @@ def submit_feedback():
         return redirect("/admin")
 
     except Exception as e:
-        return f"ERROR: {str(e)}"
+        return f"ERROR: {e}"
 
 # ---------- ADMIN ----------
 @app.route("/admin")
@@ -87,22 +94,12 @@ def admin():
     try:
         conn = get_db()
 
-        eating = conn.execute(
-            "SELECT COUNT(*) FROM responses WHERE status='yes'"
-        ).fetchone()[0]
+        eating = conn.execute("SELECT COUNT(*) FROM responses WHERE status='yes'").fetchone()[0]
+        not_eating = conn.execute("SELECT COUNT(*) FROM responses WHERE status='no'").fetchone()[0]
 
-        not_eating = conn.execute(
-            "SELECT COUNT(*) FROM responses WHERE status='no'"
-        ).fetchone()[0]
+        feedbacks = conn.execute("SELECT name, rating, comment FROM feedback").fetchall()
 
-        feedbacks = conn.execute(
-            "SELECT name, rating, comment FROM feedback"
-        ).fetchall()
-
-        avg = conn.execute(
-            "SELECT AVG(rating) FROM feedback"
-        ).fetchone()[0]
-
+        avg = conn.execute("SELECT AVG(rating) FROM feedback").fetchone()[0]
         avg_rating = round(avg, 1) if avg else 0
 
         conn.close()
@@ -116,7 +113,7 @@ def admin():
         )
 
     except Exception as e:
-        return f"ADMIN ERROR: {str(e)}"
+        return f"ADMIN ERROR: {e}"
 
 # ---------- RUN ----------
 if __name__ == "__main__":

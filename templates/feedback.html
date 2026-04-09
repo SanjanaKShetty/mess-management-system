@@ -19,14 +19,14 @@
         <p class="text-center mb-2">Rate:</p>
 
         <div class="flex justify-center gap-2 mb-4">
-            <span onclick="setRating(1)">⭐</span>
-            <span onclick="setRating(2)">⭐</span>
-            <span onclick="setRating(3)">⭐</span>
-            <span onclick="setRating(4)">⭐</span>
-            <span onclick="setRating(5)">⭐</span>
-        </div>
+    <span onclick="setRating(1)">⭐</span>
+    <span onclick="setRating(2)">⭐</span>
+    <span onclick="setRating(3)">⭐</span>
+    <span onclick="setRating(4)">⭐</span>
+    <span onclick="setRating(5)">⭐</span>
+</div>
 
-        <input type="hidden" name="rating" id="rating">
+<input type="hidden" name="rating" id="rating">
 
         <textarea name="comment" placeholder="Comment"
             class="w-full p-2 border rounded mb-4"></textarea>
@@ -42,6 +42,7 @@
 <script>
 function setRating(val){
     document.getElementById("rating").value = val;
+    console.log("Rating:", val);
 }
 </script>
 
