@@ -13,13 +13,28 @@
 <body class="bg-gray-100 p-6">
 
     <!-- Title -->
-    <h1 class="text-3xl font-bold mb-6">Admin Dashboard</h1>
+    <h1 class="text-3xl font-bold mb-6 text-center">
+    📊 Admin Dashboard
+</h1>
 
-    <!-- Alert -->
-    {% if alert %}
-    <div class="bg-red-500 text-white p-4 rounded mb-4">
-        {{alert}}
+<div class="grid grid-cols-3 gap-6 mb-6">
+
+    <div class="bg-green-500 text-white p-6 rounded-2xl shadow-lg">
+        <p class="text-lg">🍽 Eating</p>
+        <p class="text-4xl font-bold">{{eating}}</p>
     </div>
+
+    <div class="bg-red-500 text-white p-6 rounded-2xl shadow-lg">
+        <p class="text-lg">❌ Not Eating</p>
+        <p class="text-4xl font-bold">{{not_eating}}</p>
+    </div>
+
+    <div class="bg-blue-500 text-white p-6 rounded-2xl shadow-lg">
+        <p class="text-lg">⭐ Rating</p>
+        <p class="text-4xl font-bold">{{avg_rating}}</p>
+    </div>
+
+</div>
     {% endif %}
 
     <!-- Stats Cards -->
@@ -47,7 +62,7 @@
     <h2 class="text-xl font-bold mb-4">Meal Distribution</h2>
     
     <div class="w-full flex justify-center">
-        <canvas id="mealChart" style="max-width:400px; max-height:400px;"></canvas>
+        <canvas id="mealChart" style="max-width:350px; margin:auto;"></canvas>
     </div>
 </div>
 
