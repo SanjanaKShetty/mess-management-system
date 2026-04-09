@@ -3,18 +3,16 @@ import sqlite3
 
 app = Flask(__name__)
 
-# HOME
-@app.route("/")
-def home():
-    return render_template("dashboard.html")
-
-# SUBMIT
-@app.route("/submit", methods=["POST"])
-def submit():
-    name = request.form["name"]
-    status = request.form["status"]
-
+# 🔹 DB CONNECTION FUNCTION
+def get_db():
     conn = sqlite3.connect("database.db")
+    conn.row_factory = sqlite3.Row
+    return conn
+
+
+# 🔹 CREATE TABLES (RUN ON START)
+def init_db():
+    conn = get_db()
     cursor = conn.cursor()
 
     cursor.execute("""
@@ -25,88 +23,96 @@ def submit():
         )
     """)
 
-    cursor.execute("INSERT INTO responses (name, status) VALUES (?, ?)", (name, status))
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS feedback (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            name TEXT,
+            rating INTEGER,
+            comment TEXT
+        )
+    """)
 
     conn.commit()
     conn.close()
 
+init_db()
+
+
+# 🔹 HOME PAGE
+@app.route("/")
+def home():
+    return render_template("dashboard.html")
+
+
+# 🔹 SUBMIT MEAL
+@app.route("/submit", methods=["POST"])
+def submit():
+    name = request.form.get("name")
+    status = request.form.get("status")
+
+    conn = get_db()
+    conn.execute(
+        "INSERT INTO responses (name, status) VALUES (?, ?)",
+        (name, status)
+    )
+    conn.commit()
+    conn.close()
+
     return redirect("/")
+
+
+# 🔹 FEEDBACK PAGE
 @app.route("/feedback")
 def feedback():
     return render_template("feedback.html")
 
 
+# 🔹 SUBMIT FEEDBACK
 @app.route("/submit_feedback", methods=["POST"])
 def submit_feedback():
-    name = request.form["name"]
-    rating = request.form["rating"]
-    comment = request.form["comment"]
+    name = request.form.get("name")
+    rating = request.form.get("rating")
+    comment = request.form.get("comment")
 
-    conn = sqlite3.connect("database.db")
-    cursor = conn.cursor()
+    # 🚨 IMPORTANT FIX
+    if not rating:
+        return "Please select rating!"
 
-    cursor.execute("""
-        CREATE TABLE IF NOT EXISTS feedback (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            name TEXT,
-            rating INTEGER,
-            comment TEXT
-        )
-    """)
-
-    cursor.execute(
+    conn = get_db()
+    conn.execute(
         "INSERT INTO feedback (name, rating, comment) VALUES (?, ?, ?)",
         (name, rating, comment)
     )
-
     conn.commit()
     conn.close()
 
     return redirect("/admin")
 
-# ADMIN
+
+# 🔹 ADMIN PAGE
 @app.route("/admin")
 def admin():
-    conn = sqlite3.connect("database.db")
-    cursor = conn.cursor()
+    conn = get_db()
 
-    # Ensure tables exist
-    cursor.execute("""
-        CREATE TABLE IF NOT EXISTS responses (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            name TEXT,
-            status TEXT
-        )
-    """)
+    eating = conn.execute(
+        "SELECT COUNT(*) FROM responses WHERE status='yes'"
+    ).fetchone()[0]
 
-    cursor.execute("""
-        CREATE TABLE IF NOT EXISTS feedback (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            name TEXT,
-            rating INTEGER,
-            comment TEXT
-        )
-    """)
-    
+    not_eating = conn.execute(
+        "SELECT COUNT(*) FROM responses WHERE status='no'"
+    ).fetchone()[0]
 
-    # Counts
-    cursor.execute("SELECT COUNT(*) FROM responses WHERE status='yes'")
-    eating = cursor.fetchone()[0]
+    feedbacks = conn.execute(
+        "SELECT name, rating, comment FROM feedback"
+    ).fetchall()
 
-    cursor.execute("SELECT COUNT(*) FROM responses WHERE status='no'")
-    not_eating = cursor.fetchone()[0]
+    avg = conn.execute(
+        "SELECT AVG(rating) FROM feedback"
+    ).fetchone()[0]
 
-    # Feedback data
-    cursor.execute("SELECT name, rating, comment FROM feedback")
-    feedbacks = cursor.fetchall()
-
-    # Avg rating
-    cursor.execute("SELECT AVG(rating) FROM feedback")
-    avg = cursor.fetchone()[0]
     avg_rating = round(avg, 1) if avg else 0
 
     conn.close()
-    
 
     return render_template(
         "admin.html",
@@ -115,3 +121,8 @@ def admin():
         feedbacks=feedbacks,
         avg_rating=avg_rating
     )
+
+
+# 🔹 RUN
+if __name__ == "__main__":
+    app.run(debug=True)
