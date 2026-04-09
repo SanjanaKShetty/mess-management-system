@@ -35,35 +35,49 @@ def submit():
 # ADMIN
 @app.route("/admin")
 def admin():
-    try:
-        conn = sqlite3.connect("database.db")
-        cursor = conn.cursor()
+    conn = sqlite3.connect("database.db")
+    cursor = conn.cursor()
 
-        cursor.execute("""
-            CREATE TABLE IF NOT EXISTS responses (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                name TEXT,
-                status TEXT
-            )
-        """)
-
-        cursor.execute("SELECT COUNT(*) FROM responses WHERE status='yes'")
-        eating = cursor.fetchone()[0]
-
-        cursor.execute("SELECT COUNT(*) FROM responses WHERE status='no'")
-        not_eating = cursor.fetchone()[0]
-
-        cursor.execute("SELECT name, status FROM responses")
-        data = cursor.fetchall()
-
-        conn.close()
-
-        return render_template(
-            "admin.html",
-            eating=eating,
-            not_eating=not_eating,
-            data=data
+    # Ensure tables exist
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS responses (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            name TEXT,
+            status TEXT
         )
+    """)
 
-    except Exception as e:
-        return f"ERROR: {str(e)}"
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS feedback (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            name TEXT,
+            rating INTEGER,
+            comment TEXT
+        )
+    """)
+
+    # Counts
+    cursor.execute("SELECT COUNT(*) FROM responses WHERE status='yes'")
+    eating = cursor.fetchone()[0]
+
+    cursor.execute("SELECT COUNT(*) FROM responses WHERE status='no'")
+    not_eating = cursor.fetchone()[0]
+
+    # Feedback data
+    cursor.execute("SELECT name, rating, comment FROM feedback")
+    feedbacks = cursor.fetchall()
+
+    # Avg rating
+    cursor.execute("SELECT AVG(rating) FROM feedback")
+    avg = cursor.fetchone()[0]
+    avg_rating = round(avg, 1) if avg else 0
+
+    conn.close()
+
+    return render_template(
+        "admin.html",
+        eating=eating,
+        not_eating=not_eating,
+        feedbacks=feedbacks,
+        avg_rating=avg_rating
+    )
