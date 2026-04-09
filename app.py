@@ -1,10 +1,9 @@
 from flask import Flask, render_template, request, redirect
 import sqlite3
-import os
 
 app = Flask(__name__)
 
-# HOME ROUTE
+# HOME
 @app.route("/")
 def home():
     return render_template("dashboard.html")
@@ -41,11 +40,9 @@ def admin():
 
     conn.close()
 
-    return render_template("admin.html",
-                           eating=eating,
-                           not_eating=not_eating,
-                           data=data)
-
-# IMPORTANT FOR RENDER
-if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=10000)
+    return render_template(
+        "admin.html",
+        eating=eating,
+        not_eating=not_eating,
+        data=data
+    )
