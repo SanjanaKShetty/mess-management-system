@@ -35,31 +35,35 @@ def submit():
 # ADMIN
 @app.route("/admin")
 def admin():
-    conn = sqlite3.connect("database.db")
-    cursor = conn.cursor()
+    try:
+        conn = sqlite3.connect("database.db")
+        cursor = conn.cursor()
 
-    cursor.execute("""
-        CREATE TABLE IF NOT EXISTS responses (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            name TEXT,
-            status TEXT
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS responses (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                name TEXT,
+                status TEXT
+            )
+        """)
+
+        cursor.execute("SELECT COUNT(*) FROM responses WHERE status='yes'")
+        eating = cursor.fetchone()[0]
+
+        cursor.execute("SELECT COUNT(*) FROM responses WHERE status='no'")
+        not_eating = cursor.fetchone()[0]
+
+        cursor.execute("SELECT name, status FROM responses")
+        data = cursor.fetchall()
+
+        conn.close()
+
+        return render_template(
+            "admin.html",
+            eating=eating,
+            not_eating=not_eating,
+            data=data
         )
-    """)
 
-    cursor.execute("SELECT COUNT(*) FROM responses WHERE status='yes'")
-    eating = cursor.fetchone()[0]
-
-    cursor.execute("SELECT COUNT(*) FROM responses WHERE status='no'")
-    not_eating = cursor.fetchone()[0]
-
-    cursor.execute("SELECT name, status FROM responses")
-    data = cursor.fetchall()
-
-    conn.close()
-
-    return render_template(
-        "admin.html",
-        eating=eating,
-        not_eating=not_eating,
-        data=data
-    )
+    except Exception as e:
+        return f"ERROR: {str(e)}"
