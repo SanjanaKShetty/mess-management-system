@@ -17,7 +17,16 @@ def submit():
     conn = sqlite3.connect("database.db")
     cursor = conn.cursor()
 
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS responses (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            name TEXT,
+            status TEXT
+        )
+    """)
+
     cursor.execute("INSERT INTO responses (name, status) VALUES (?, ?)", (name, status))
+
     conn.commit()
     conn.close()
 
@@ -28,6 +37,14 @@ def submit():
 def admin():
     conn = sqlite3.connect("database.db")
     cursor = conn.cursor()
+
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS responses (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            name TEXT,
+            status TEXT
+        )
+    """)
 
     cursor.execute("SELECT COUNT(*) FROM responses WHERE status='yes'")
     eating = cursor.fetchone()[0]
