@@ -1,40 +1,62 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Dashboard</title>
+    <title>Smart Mess System</title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="bg-gray-100 p-6">
 
-    <h2 class="text-2xl font-bold mb-4">Welcome {{name}}</h2>
+<body class="bg-gray-100">
 
-    <div class="bg-white p-6 rounded-xl shadow mb-6">
-        <h3 class="text-lg font-semibold">
-            Total Students Eating Today: {{count}}
-        </h3>
-    </div>
+<div class="max-w-2xl mx-auto mt-10">
 
+    <!-- Title -->
+    <h1 class="text-3xl font-bold text-center mb-6">
+        🍽 Smart Mess Management
+    </h1>
+
+    <!-- Card -->
     <div class="bg-white p-6 rounded-xl shadow">
+
+        <h2 class="text-xl font-semibold mb-4">
+            Will you eat today?
+        </h2>
+
         <form action="/submit" method="POST">
-            <input type="hidden" name="name" value="{{name}}">
 
-            <label class="block mb-2 font-semibold">Will you eat today?</label>
+            <!-- Name -->
+            <input type="text" name="name" placeholder="Enter your name"
+                class="w-full p-3 border rounded mb-4" required>
 
-            <input type="radio" name="status" value="yes"> Yes
-            <input type="radio" name="status" value="no" class="ml-4"> No
+            <!-- Options -->
+            <div class="flex gap-6 mb-4">
+                <label>
+                    <input type="radio" name="status" value="yes" required>
+                    Yes
+                </label>
 
-            <br><br>
+                <label>
+                    <input type="radio" name="status" value="no">
+                    No
+                </label>
+            </div>
 
-            <button class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">
-                <a href="/feedback_page/{{name}}">
-    <button class="mt-4 bg-purple-500 text-white px-4 py-2 rounded">
-        Give Feedback
-    </button>
-</a>
+            <!-- Button -->
+            <button class="w-full bg-green-500 text-white py-2 rounded hover:bg-green-600">
                 Submit
             </button>
+
         </form>
+
+        <!-- Feedback button -->
+        <a href="/feedback">
+            <button class="w-full mt-3 bg-purple-500 text-white py-2 rounded hover:bg-purple-600">
+                Give Feedback ⭐
+            </button>
+        </a>
+
     </div>
+
+</div>
 
 </body>
 </html>
