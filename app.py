@@ -3,7 +3,7 @@ import sqlite3
 
 app = Flask(__name__)
 
-# ---------------- DB ----------------
+# ---------- DB ----------
 def get_db():
     conn = sqlite3.connect("database.db")
     return conn
@@ -34,12 +34,12 @@ def init_db():
 
 init_db()
 
-# ---------------- HOME ----------------
+# ---------- HOME ----------
 @app.route("/")
 def home():
     return render_template("dashboard.html")
 
-# ---------------- SUBMIT MEAL ----------------
+# ---------- SUBMIT ----------
 @app.route("/submit", methods=["POST"])
 def submit():
     name = request.form.get("name")
@@ -52,54 +52,72 @@ def submit():
 
     return redirect("/")
 
-# ---------------- FEEDBACK PAGE ----------------
+# ---------- FEEDBACK PAGE ----------
 @app.route("/feedback")
 def feedback():
     return render_template("feedback.html")
 
-# ---------------- SUBMIT FEEDBACK ----------------
+# ---------- SUBMIT FEEDBACK ----------
 @app.route("/submit_feedback", methods=["POST"])
 def submit_feedback():
-    name = request.form.get("name")
-    rating = request.form.get("rating")
-    comment = request.form.get("comment")
+    try:
+        name = request.form.get("name")
+        rating = request.form.get("rating")
+        comment = request.form.get("comment")
 
-    if not rating:
-        return "Please select rating ⭐"
+        if not rating:
+            return "Please select rating ⭐"
 
-    conn = get_db()
-    conn.execute(
-        "INSERT INTO feedback (name, rating, comment) VALUES (?, ?, ?)",
-        (name, int(rating), comment)
-    )
-    conn.commit()
-    conn.close()
+        conn = get_db()
+        conn.execute(
+            "INSERT INTO feedback (name, rating, comment) VALUES (?, ?, ?)",
+            (name, int(rating), comment)
+        )
+        conn.commit()
+        conn.close()
 
-    return redirect("/admin")
+        return redirect("/admin")
 
-# ---------------- ADMIN ----------------
+    except Exception as e:
+        return f"ERROR: {str(e)}"
+
+# ---------- ADMIN ----------
 @app.route("/admin")
 def admin():
-    conn = get_db()
+    try:
+        conn = get_db()
 
-    eating = conn.execute("SELECT COUNT(*) FROM responses WHERE status='yes'").fetchone()[0]
-    not_eating = conn.execute("SELECT COUNT(*) FROM responses WHERE status='no'").fetchone()[0]
+        eating = conn.execute(
+            "SELECT COUNT(*) FROM responses WHERE status='yes'"
+        ).fetchone()[0]
 
-    feedbacks = conn.execute("SELECT name, rating, comment FROM feedback").fetchall()
+        not_eating = conn.execute(
+            "SELECT COUNT(*) FROM responses WHERE status='no'"
+        ).fetchone()[0]
 
-    avg = conn.execute("SELECT AVG(rating) FROM feedback").fetchone()[0]
-    avg_rating = round(avg, 1) if avg else 0
+        feedbacks = conn.execute(
+            "SELECT name, rating, comment FROM feedback"
+        ).fetchall()
 
-    conn.close()
+        avg = conn.execute(
+            "SELECT AVG(rating) FROM feedback"
+        ).fetchone()[0]
 
-    return render_template(
-        "admin.html",
-        eating=eating,
-        not_eating=not_eating,
-        feedbacks=feedbacks,
-        avg_rating=avg_rating
-    )
+        avg_rating = round(avg, 1) if avg else 0
 
-# ---------------- RUN ----------------
+        conn.close()
+
+        return render_template(
+            "admin.html",
+            eating=eating,
+            not_eating=not_eating,
+            feedbacks=feedbacks,
+            avg_rating=avg_rating
+        )
+
+    except Exception as e:
+        return f"ADMIN ERROR: {str(e)}"
+
+# ---------- RUN ----------
 if __name__ == "__main__":
     app.run(debug=True)
