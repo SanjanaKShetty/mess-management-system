@@ -3,12 +3,12 @@ import sqlite3
 
 app = Flask(__name__)
 
-# Home page
+# HOME ROUTE
 @app.route("/")
 def home():
     return render_template("dashboard.html")
 
-# Submit form
+# SUBMIT
 @app.route("/submit", methods=["POST"])
 def submit():
     name = request.form["name"]
@@ -23,7 +23,7 @@ def submit():
 
     return redirect("/")
 
-# Admin page
+# ADMIN
 @app.route("/admin")
 def admin():
     conn = sqlite3.connect("database.db")
@@ -45,5 +45,6 @@ def admin():
                            not_eating=not_eating,
                            data=data)
 
+# IMPORTANT FOR RENDER
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(host="0.0.0.0", port=10000)
