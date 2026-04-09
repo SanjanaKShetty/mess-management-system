@@ -3,17 +3,16 @@ import sqlite3
 
 app = Flask(__name__)
 
-# DB
+# ---------------- DB ----------------
 def get_db():
     conn = sqlite3.connect("database.db")
     return conn
 
-# INIT DB
 def init_db():
     conn = get_db()
-    cursor = conn.cursor()
+    cur = conn.cursor()
 
-    cursor.execute("""
+    cur.execute("""
     CREATE TABLE IF NOT EXISTS responses (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         name TEXT,
@@ -21,7 +20,7 @@ def init_db():
     )
     """)
 
-    cursor.execute("""
+    cur.execute("""
     CREATE TABLE IF NOT EXISTS feedback (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         name TEXT,
@@ -35,12 +34,12 @@ def init_db():
 
 init_db()
 
-# HOME
+# ---------------- HOME ----------------
 @app.route("/")
 def home():
     return render_template("dashboard.html")
 
-# SUBMIT MEAL
+# ---------------- SUBMIT MEAL ----------------
 @app.route("/submit", methods=["POST"])
 def submit():
     name = request.form.get("name")
@@ -53,22 +52,20 @@ def submit():
 
     return redirect("/")
 
-# FEEDBACK PAGE
+# ---------------- FEEDBACK PAGE ----------------
 @app.route("/feedback")
 def feedback():
     return render_template("feedback.html")
 
-# SUBMIT FEEDBACK
+# ---------------- SUBMIT FEEDBACK ----------------
 @app.route("/submit_feedback", methods=["POST"])
 def submit_feedback():
     name = request.form.get("name")
     rating = request.form.get("rating")
     comment = request.form.get("comment")
 
-    print("DEBUG:", name, rating, comment)  # 🔥 IMPORTANT
-
-    if rating is None or rating == "":
-        return "ERROR: Rating not selected"
+    if not rating:
+        return "Please select rating ⭐"
 
     conn = get_db()
     conn.execute(
@@ -80,7 +77,7 @@ def submit_feedback():
 
     return redirect("/admin")
 
-# ADMIN
+# ---------------- ADMIN ----------------
 @app.route("/admin")
 def admin():
     conn = get_db()
@@ -103,5 +100,6 @@ def admin():
         avg_rating=avg_rating
     )
 
+# ---------------- RUN ----------------
 if __name__ == "__main__":
     app.run(debug=True)
