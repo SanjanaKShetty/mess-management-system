@@ -31,6 +31,38 @@ def submit():
     conn.close()
 
     return redirect("/")
+@app.route("/feedback")
+def feedback():
+    return render_template("feedback.html")
+
+
+@app.route("/submit_feedback", methods=["POST"])
+def submit_feedback():
+    name = request.form["name"]
+    rating = request.form["rating"]
+    comment = request.form["comment"]
+
+    conn = sqlite3.connect("database.db")
+    cursor = conn.cursor()
+
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS feedback (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            name TEXT,
+            rating INTEGER,
+            comment TEXT
+        )
+    """)
+
+    cursor.execute(
+        "INSERT INTO feedback (name, rating, comment) VALUES (?, ?, ?)",
+        (name, rating, comment)
+    )
+
+    conn.commit()
+    conn.close()
+
+    return redirect("/admin")
 
 # ADMIN
 @app.route("/admin")
@@ -55,6 +87,7 @@ def admin():
             comment TEXT
         )
     """)
+    
 
     # Counts
     cursor.execute("SELECT COUNT(*) FROM responses WHERE status='yes'")
@@ -73,6 +106,7 @@ def admin():
     avg_rating = round(avg, 1) if avg else 0
 
     conn.close()
+    
 
     return render_template(
         "admin.html",
