@@ -6,25 +6,20 @@
 </head>
 <body class="bg-gray-100 flex justify-center items-center h-screen">
 
-    <div class="bg-white p-8 rounded-xl shadow w-96">
-        <h2 class="text-xl font-bold mb-4">Food Feedback</h2>
+  <div class="bg-white p-6 rounded shadow">
+    <h2 class="text-xl font-bold mb-4">Student Feedback</h2>
 
-        <form action="/feedback" method="POST">
-            <input type="hidden" name="name" value="{{name}}">
-
-            <label>Rating (1-5)</label>
-            <input type="number" name="rating" min="1" max="5"
-                   class="w-full p-2 border rounded mb-3" required>
-
-            <label>Comment</label>
-            <textarea name="comment"
-                      class="w-full p-2 border rounded mb-3"></textarea>
-
-            <button class="bg-blue-500 text-white w-full p-2 rounded">
-                Submit Feedback
-            </button>
-        </form>
-    </div>
+    {% if feedbacks %}
+        {% for f in feedbacks %}
+        <div class="border-b py-3 px-2 rounded mb-2 {% if f[1] < 3 %}bg-red-100{% else %}bg-gray-50{% endif %}">
+            <p class="font-semibold">{{f[0]}} ⭐ {{f[1]}}</p>
+            <p class="text-gray-600">{{f[2]}}</p>
+        </div>
+        {% endfor %}
+    {% else %}
+        <p class="text-gray-500">No feedback yet</p>
+    {% endif %}
+</div>
 
 </body>
 </html>
