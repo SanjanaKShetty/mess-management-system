@@ -18,15 +18,18 @@
 
         <p class="text-center mb-2">Rate:</p>
 
-        <div class="flex justify-center gap-2 mb-4">
-    <span onclick="setRating(1)">⭐</span>
-    <span onclick="setRating(2)">⭐</span>
-    <span onclick="setRating(3)">⭐</span>
-    <span onclick="setRating(4)">⭐</span>
-    <span onclick="setRating(5)">⭐</span>
-</div>
+        <!-- ⭐ STAR SYSTEM -->
+        <div class="flex justify-center gap-2 mb-4 text-3xl">
 
-<input type="hidden" name="rating" id="rating">
+            <span class="star" data-value="1">☆</span>
+            <span class="star" data-value="2">☆</span>
+            <span class="star" data-value="3">☆</span>
+            <span class="star" data-value="4">☆</span>
+            <span class="star" data-value="5">☆</span>
+
+        </div>
+
+        <input type="hidden" name="rating" id="rating" required>
 
         <textarea name="comment" placeholder="Comment"
             class="w-full p-2 border rounded mb-4"></textarea>
@@ -39,11 +42,25 @@
 
 </div>
 
+<!-- ⭐ SCRIPT -->
 <script>
-function setRating(val){
-    document.getElementById("rating").value = val;
-    console.log("Rating:", val);
-}
+const stars = document.querySelectorAll(".star");
+const ratingInput = document.getElementById("rating");
+
+stars.forEach(star => {
+    star.addEventListener("click", () => {
+        let value = star.getAttribute("data-value");
+        ratingInput.value = value;
+
+        stars.forEach(s => {
+            if (s.getAttribute("data-value") <= value) {
+                s.textContent = "⭐";
+            } else {
+                s.textContent = "☆";
+            }
+        });
+    });
+});
 </script>
 
 </body>
