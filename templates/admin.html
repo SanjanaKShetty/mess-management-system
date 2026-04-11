@@ -2,87 +2,67 @@
 <html>
 <head>
     <title>Admin Dashboard</title>
-
-    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-
-    <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 
 <body class="bg-gray-100 p-6">
 
-    <!-- Title -->
-    <h1 class="text-3xl font-bold mb-6 text-center">
-    📊 Admin Dashboard
-</h1>
+<h1 class="text-3xl font-bold mb-6">Admin Dashboard</h1>
 
-<div class="grid grid-cols-3 gap-6 mb-6">
+<!-- STATS -->
+<div class="grid grid-cols-3 gap-4 mb-6">
 
-    <div class="bg-green-500 text-white p-6 rounded-2xl shadow-lg">
-        <p class="text-lg">🍽 Eating</p>
-        <p class="text-4xl font-bold">{{eating}}</p>
+    <div class="bg-green-500 text-white p-4 rounded shadow">
+        <h2>Eating</h2>
+        <p class="text-2xl">{{ eating }}</p>
     </div>
 
-    <div class="bg-red-500 text-white p-6 rounded-2xl shadow-lg">
-        <p class="text-lg">❌ Not Eating</p>
-        <p class="text-4xl font-bold">{{not_eating}}</p>
+    <div class="bg-red-500 text-white p-4 rounded shadow">
+        <h2>Not Eating</h2>
+        <p class="text-2xl">{{ not_eating }}</p>
     </div>
 
-    <div class="bg-blue-500 text-white p-6 rounded-2xl shadow-lg">
-        <p class="text-lg">⭐ Rating</p>
-        <p class="text-4xl font-bold">{{avg_rating}}</p>
-    </div>
-
-</div>
-    {% endif %}
-
-    <!-- Stats Cards -->
-    <div class="grid grid-cols-3 gap-6 mb-6">
-
-    <div class="bg-green-500 text-white p-6 rounded-xl shadow-lg">
-        <h2 class="text-lg">🍽 Eating</h2>
-        <p class="text-3xl font-bold">{{eating}}</p>
-    </div>
-
-    <div class="bg-red-500 text-white p-6 rounded-xl shadow-lg">
-        <h2 class="text-lg">❌ Not Eating</h2>
-        <p class="text-3xl font-bold">{{not_eating}}</p>
-    </div>
-
-    <div class="bg-blue-500 text-white p-6 rounded-xl shadow-lg">
-        <h2 class="text-lg">⭐ Avg Rating</h2>
-        <p class="text-3xl font-bold">{{ avg_rating }}</p>
+    <div class="bg-blue-500 text-white p-4 rounded shadow">
+        <h2>Avg Rating</h2>
+        <p class="text-2xl">{{ avg_rating }}</p>
     </div>
 
 </div>
 
-    <!-- Chart Section -->
-    <<div class="bg-white p-6 rounded shadow mb-6">
-    <h2 class="text-xl font-bold mb-4">Meal Distribution</h2>
-    
-    <div class="w-full flex justify-center">
-        <canvas id="mealChart" style="max-width:350px; margin:auto;"></canvas>
-    </div>
+<!-- CHART -->
+<div class="bg-white p-6 rounded shadow mb-6">
+    <h2 class="text-xl mb-4">Meal Distribution</h2>
+    <canvas id="chart"></canvas>
 </div>
 
-   <script>
-    const ctx = document.getElementById('mealChart');
+<!-- FEEDBACK -->
+<div class="bg-white p-6 rounded shadow">
+    <h2 class="text-xl mb-4">Feedback</h2>
 
-    const eating = JSON.parse('{{ eating | tojson }}');
-    const notEating = JSON.parse('{{ not_eating | tojson }}');
+    {% for f in feedbacks %}
+        <div class="border-b py-2">
+            <p><strong>{{ f[0] }}</strong> ⭐ {{ f[1] }}</p>
+            <p class="text-gray-600">{{ f[2] }}</p>
+        </div>
+    {% endfor %}
 
-    new Chart(ctx, {
-        type: 'pie',
-        data: {
-            labels: ['Eating', 'Not Eating'],
-            datasets: [{
-                data: [eating, notEating]
-            }]
-        }
-    });
+</div>
+
+<script>
+const ctx = document.getElementById('chart');
+
+new Chart(ctx, {
+    type: 'pie',
+    data: {
+        labels: ['Eating', 'Not Eating'],
+        datasets: [{
+            data: [{{ eating }}, {{ not_eating }}],
+            backgroundColor: ['green', 'red']
+        }]
+    }
+});
 </script>
-    
 
 </body>
 </html>
