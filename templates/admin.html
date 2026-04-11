@@ -8,43 +8,50 @@
 
 <body class="bg-gray-100 p-6">
 
-<h1 class="text-3xl font-bold mb-6">Admin Dashboard</h1>
+<h1 class="text-3xl font-bold mb-6 text-center">📊 Admin Dashboard</h1>
 
 <!-- STATS -->
-<div class="grid grid-cols-3 gap-4 mb-6">
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
 
-    <div class="bg-green-500 text-white p-4 rounded shadow">
-        <h2>Eating</h2>
-        <p class="text-2xl">{{ eating }}</p>
+    <div class="bg-green-500 text-white p-6 rounded-xl shadow-lg">
+        <h2 class="text-lg">🍽 Eating</h2>
+        <p class="text-3xl font-bold">{{ eating }}</p>
     </div>
 
-    <div class="bg-red-500 text-white p-4 rounded shadow">
-        <h2>Not Eating</h2>
-        <p class="text-2xl">{{ not_eating }}</p>
+    <div class="bg-red-500 text-white p-6 rounded-xl shadow-lg">
+        <h2 class="text-lg">❌ Not Eating</h2>
+        <p class="text-3xl font-bold">{{ not_eating }}</p>
     </div>
 
-    <div class="bg-blue-500 text-white p-4 rounded shadow">
-        <h2>Avg Rating</h2>
-        <p class="text-2xl">{{ avg_rating }}</p>
+    <div class="bg-blue-500 text-white p-6 rounded-xl shadow-lg">
+        <h2 class="text-lg">⭐ Avg Rating</h2>
+        <p class="text-3xl font-bold">{{ avg_rating }}</p>
     </div>
 
 </div>
 
 <!-- CHART -->
-<div class="bg-white p-6 rounded shadow mb-6">
-    <h2 class="text-xl mb-4">Meal Distribution</h2>
-    <canvas id="chart"></canvas>
+<div class="bg-white p-6 rounded-xl shadow mb-6">
+    <h2 class="text-xl font-semibold mb-4">Meal Distribution</h2>
+
+    <!-- FIXED SIZE -->
+    <div class="w-64 mx-auto">
+        <canvas id="chart"></canvas>
+    </div>
 </div>
 
 <!-- FEEDBACK -->
-<div class="bg-white p-6 rounded shadow">
-    <h2 class="text-xl mb-4">Feedback</h2>
+<div class="bg-white p-6 rounded-xl shadow">
+    <h2 class="text-xl font-semibold mb-4">💬 Student Feedback</h2>
 
     {% for f in feedbacks %}
-        <div class="border-b py-2">
-            <p><strong>{{ f[0] }}</strong> ⭐ {{ f[1] }}</p>
-            <p class="text-gray-600">{{ f[2] }}</p>
+    <div class="border-b py-3">
+        <div class="flex justify-between items-center">
+            <p class="font-semibold">{{ f[0] }}</p>
+            <p class="text-yellow-500">⭐ {{ f[1] }}</p>
         </div>
+        <p class="text-gray-600">{{ f[2] }}</p>
+    </div>
     {% endfor %}
 
 </div>
@@ -53,13 +60,20 @@
 const ctx = document.getElementById('chart');
 
 new Chart(ctx, {
-    type: 'pie',
+    type: 'doughnut',
     data: {
         labels: ['Eating', 'Not Eating'],
         datasets: [{
             data: [{{ eating }}, {{ not_eating }}],
-            backgroundColor: ['green', 'red']
+            backgroundColor: ['#22c55e', '#ef4444']
         }]
+    },
+    options: {
+        plugins: {
+            legend: {
+                position: 'bottom'
+            }
+        }
     }
 });
 </script>
