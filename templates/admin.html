@@ -33,10 +33,36 @@
 <!-- CHART -->
 <div class="bg-white p-6 rounded shadow mb-6">
     <h2 class="text-xl font-bold mb-4">Meal Distribution</h2>
-    <div class="w-64 mx-auto">
+
+    <!-- FIXED SIZE CONTAINER -->
+    <div style="width: 300px; height: 300px; margin: auto;">
         <canvas id="mealChart"></canvas>
     </div>
 </div>
+
+<script>
+const ctx = document.getElementById('mealChart');
+
+const eating = {{ eating }};
+const notEating = {{ not_eating }};
+
+if (eating > 0 || notEating > 0) {
+    new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+            labels: ['Eating', 'Not Eating'],
+            datasets: [{
+                data: [eating, notEating],
+                backgroundColor: ['#22c55e', '#ef4444']
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false
+        }
+    });
+}
+</script>
 
 <!-- FEEDBACK -->
 <div class="bg-white p-6 rounded shadow mt-6">
