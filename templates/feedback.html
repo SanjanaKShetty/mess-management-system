@@ -5,36 +5,43 @@
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
 
-<body class="bg-gray-100 flex justify-center items-center h-screen">
+<body class="bg-gray-100 flex items-center justify-center h-screen">
 
-<div class="bg-white p-8 rounded-xl shadow w-96">
+<div class="bg-white p-8 rounded-xl shadow-lg w-96 text-center">
 
-    <h2 class="text-2xl font-bold text-center mb-6">⭐ Feedback</h2>
+    <h1 class="text-2xl font-bold mb-4">⭐ Feedback</h1>
 
     <form action="/submit_feedback" method="POST">
 
         <input type="text" name="name" placeholder="Your name"
             class="w-full p-2 border rounded mb-4" required>
 
-        <p class="text-center mb-2">Rate:</p>
+        <p class="mb-2">Rate:</p>
 
-        <!-- ⭐ STAR SYSTEM -->
-        <div class="flex justify-center gap-2 mb-4 text-3xl">
+        <!-- ⭐ CLICKABLE STARS -->
+        <div class="flex justify-center gap-2 mb-4">
 
-            <span class="star" data-value="1">☆</span>
-            <span class="star" data-value="2">☆</span>
-            <span class="star" data-value="3">☆</span>
-            <span class="star" data-value="4">☆</span>
-            <span class="star" data-value="5">☆</span>
+            <input type="radio" name="rating" value="1" id="star1" hidden>
+            <label for="star1" class="text-2xl cursor-pointer">☆</label>
+
+            <input type="radio" name="rating" value="2" id="star2" hidden>
+            <label for="star2" class="text-2xl cursor-pointer">☆</label>
+
+            <input type="radio" name="rating" value="3" id="star3" hidden>
+            <label for="star3" class="text-2xl cursor-pointer">☆</label>
+
+            <input type="radio" name="rating" value="4" id="star4" hidden>
+            <label for="star4" class="text-2xl cursor-pointer">☆</label>
+
+            <input type="radio" name="rating" value="5" id="star5" hidden>
+            <label for="star5" class="text-2xl cursor-pointer">☆</label>
 
         </div>
 
-        <input type="hidden" name="rating" id="rating" required>
-
-        <textarea name="comment" placeholder="Comment"
+        <textarea name="comment" placeholder="Your feedback"
             class="w-full p-2 border rounded mb-4"></textarea>
 
-        <button class="w-full bg-purple-500 text-white p-2 rounded">
+        <button class="bg-purple-500 text-white px-4 py-2 rounded w-full">
             Submit
         </button>
 
@@ -42,25 +49,19 @@
 
 </div>
 
-<!-- ⭐ SCRIPT -->
 <script>
-const stars = document.querySelectorAll(".star");
-const ratingInput = document.getElementById("rating");
+    const stars = document.querySelectorAll("label");
+    const radios = document.querySelectorAll("input[name='rating']");
 
-stars.forEach(star => {
-    star.addEventListener("click", () => {
-        let value = star.getAttribute("data-value");
-        ratingInput.value = value;
+    stars.forEach((star, index) => {
+        star.addEventListener("click", () => {
+            radios[index].checked = true;
 
-        stars.forEach(s => {
-            if (s.getAttribute("data-value") <= value) {
-                s.textContent = "⭐";
-            } else {
-                s.textContent = "☆";
-            }
+            stars.forEach((s, i) => {
+                s.textContent = i <= index ? "⭐" : "☆";
+            });
         });
     });
-});
 </script>
 
 </body>

@@ -31,29 +31,31 @@
 </div>
 
 <!-- CHART -->
-<div class="bg-white p-6 rounded-xl shadow mb-6">
-    <h2 class="text-xl font-semibold mb-4">Meal Distribution</h2>
-
-    <!-- FIXED SIZE -->
+<div class="bg-white p-6 rounded shadow mb-6">
+    <h2 class="text-xl font-bold mb-4">Meal Distribution</h2>
     <div class="w-64 mx-auto">
-        <canvas id="chart"></canvas>
+        <canvas id="mealChart"></canvas>
     </div>
 </div>
 
 <!-- FEEDBACK -->
-<div class="bg-white p-6 rounded-xl shadow">
-    <h2 class="text-xl font-semibold mb-4">💬 Student Feedback</h2>
+<div class="bg-white p-6 rounded shadow mt-6">
+    <h2 class="text-xl font-bold mb-4">Student Feedback</h2>
 
     {% for f in feedbacks %}
-    <div class="border-b py-3">
-        <div class="flex justify-between items-center">
-            <p class="font-semibold">{{ f[0] }}</p>
-            <p class="text-yellow-500">⭐ {{ f[1] }}</p>
+    <div class="border-b py-3 flex justify-between items-center">
+
+        <div>
+            <p class="font-semibold">{{f[0]}}</p>
+            <p class="text-gray-600 text-sm">{{f[2]}}</p>
         </div>
-        <p class="text-gray-600">{{ f[2] }}</p>
+
+        <div class="text-yellow-500 font-bold">
+            ⭐ {{f[1]}}
+        </div>
+
     </div>
     {% endfor %}
-
 </div>
 
 <script>
